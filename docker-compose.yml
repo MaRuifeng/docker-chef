@@ -1,0 +1,16 @@
+chef_server: 
+  image: "${DTR}/${ORG}/cs-image:${RELEASE}"
+  container_name: chef_server
+  hostname: ${HOSTNAME}
+  restart: always
+  volumes:
+    # Put important Chef erver data into docker volumes
+    # Just specify a path and let the Engine create a volume
+    - /etc/opscode
+    - /var/opt/opscode
+  privileged: 
+    true
+  ports:
+    - "${SSL_PORT}:${SSL_PORT}"
+  extra_hosts:
+    - "${HOSTNAME}:127.0.0.1"
