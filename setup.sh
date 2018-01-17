@@ -5,8 +5,6 @@
 # Author: ruifengm@sg.ibm.com
 # Date: 2018-Jan-16
 
-
-
 # When customized SSL port is used, beware of below open bug and its workaround
 # https://github.com/chef/chef-server/issues/50
 # In file /opt/opscode/embedded/cookbooks/private-chef/templates/default/oc_erchef.config.erb, below change need to be made
@@ -16,17 +14,17 @@
 export S3_URL_CONFIG_PATH=/opt/opscode/embedded/cookbooks/private-chef/templates/default/oc_erchef.config.erb
 export S3_URL_CHECK_PATH=/var/opt/opscode/opscode-erchef/etc/app.config
 
-if [[ -z ${HOSTNAME} ]]; then
-	export API_FQDN=${HOSTNAME}
-else 
-	export API_FQDN=$(hostname -f)
-fi
+export API_FQDN=$(hostname -f)
 
 rm -f /root/chef_configured
 
-echo -e "[$(date)]\tAdding api_fqdn to map localhost"
-grep -q ${API_FQDN} /etc/hosts || echo -e "[$(date)]\tAlready mapped."
-grep -q ${API_FQDN} /etc/hosts || echo "127.0.0.1 ${API_FQDN}" >> /etc/hosts
+echo -e "[$(date)]\tAdding api_fqdn to map localhost ..."
+
+grep -qE "127\.0\.0\.1.+${API_FQDN}" /etc/hosts || echo "127.0.0.1 ${API_FQDN}" >> /etc/hosts
+
+echo -e "[$(date)]\tReconfiguring the Chef server if not done before ..."
+
+[[ -z $(chef-server-ctl status) ]] && chef-server-ctl reconfigure 2>&1
 
 if [[ ${NON_STD_SSL} == true ]]; then
 	echo -e "[$(date)]\tAdding api_fqdn: ${API_FQDN} to /etc/opscode/chef-server.rb"
@@ -35,10 +33,10 @@ if [[ ${NON_STD_SSL} == true ]]; then
 	echo "nginx['ssl_port'] = ${SSL_PORT}" >> /etc/opscode/chef-server.rb
 	cat /etc/opscode/chef-server.rb
 
-	echo "[$(date)]\tHacking s3_url of Bookshelf to ensure successful cookbook upload..."
+	echo "[$(date)]\tHacking s3_url of Bookshelf to ensure successful cookbook upload ..."
 	sed -i "s/{s3_url, .*/{s3_url, \"https:\/\/${API_FQDN}:${SSL_PORT}\"},/g" ${S3_URL_CONFIG_PATH}
 	echo -e "Reconfiguring chef server..."
-	chef-server-ctl reconfigure
+	chef-server-ctl reconfigure 2>&1
 	echo -e "[$(date)]\tChecking s3_url setting in ${S3_URL_CHECK_PATH} ..."
 	cat ${S3_URL_CHECK_PATH} | grep s3_url
 fi

@@ -1,3 +1,5 @@
+#!/bin/bash -e
+
 ##########################################################################################
 # Chef server docker image
 # 1. Build a docker image of the chef server as specified in the Dockerfile

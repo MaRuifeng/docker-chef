@@ -19,14 +19,15 @@ RUN yum -y update
 #     yum -y install python-setuptools && easy_install supervisor && \
 #     yum clean all
 
+# 'which' is needed by the oc_bifrost package
+RUN yum -y install which
+
 ADD https://packages.chef.io/files/stable/chef-server/12.17.15/el/6/chef-server-core-12.17.15-1.el6.x86_64.rpm /tmp/chef-server-core-12.17.15-1.el6.x86_64.rpm
 
 RUN rpm -Uvh /tmp/chef-server-core-12.17.15-1.el6.x86_64.rpm && \
     rm /tmp/chef-server-core-12.17.15-1.el6.x86_64.rpm
 
 RUN ln -sf /bin/true /sbin/initctl && mkdir /etc/cron.hourly && mkdir -p /var/www/shared
-
-EXPOSE  443
 
 ADD startup.sh setup.sh /usr/local/bin/
 

@@ -2,7 +2,10 @@ chef_server:
   image: "${DTR}/${ORG}/cs-image:${RELEASE}"
   container_name: chef_server
   hostname: ${HOSTNAME}
+  environment:
+    - SSL_PORT=${SSL_PORT}
   restart: always
+  env_file: ./chef_server.env
   volumes:
     # Put important Chef erver data into docker volumes
     # Just specify a path and let the Engine create a volume
@@ -12,5 +15,5 @@ chef_server:
     true
   ports:
     - "${SSL_PORT}:${SSL_PORT}"
-  extra_hosts:
-    - "${HOSTNAME}:127.0.0.1"
+  # extra_hosts:
+  #   - "${HOSTNAME}:127.0.0.1"

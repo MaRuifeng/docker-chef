@@ -1,3 +1,5 @@
+#!/bin/bash -e
+
 ##########################################################################################
 # Chef server docker container
 # 1. Retrieve the docker image from DTR
@@ -51,8 +53,8 @@ done
 
 echo -e "[$(date)]\tDeploying Chef server container ..."
 
-docker login -u $DTR_USER -p $DTR_PASS $DTR_HOST
-docker pull $DTR_HOST/$DTR_ORG/cs-image:$RELEASE
+# docker login -u $DTR_USER -p $DTR_PASS $DTR_HOST
+# docker pull $DTR_HOST/$DTR_ORG/cs-image:$RELEASE
 
 docker-compose up -d
 

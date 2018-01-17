@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash
 
 # Start up the chef services inside the container, monitor their statues and exit if anyone is down
 
@@ -7,7 +7,7 @@
 
 echo -e "[$(date)]\tSetting kernel parameters and applying required system changes ..."
 sysctl -w kernel.shmall=4194304
-sysctl -w kernel.shmmax=17179869184
+sysctl -w kernel.shmmax=17179869184 # for postgres
 sysctl -w vm.overcommit_memory=1
 echo never > /sys/kernel/mm/transparent_hugepage/enabled
 echo 511 > /proc/sys/net/core/somaxconn
@@ -16,13 +16,11 @@ echo "127.0.0.1 $(hostname -f) $(hostname -s)" >> /etc/hosts # Needed for Booksh
 # Handling issue reported here (https://github.com/chef/chef-server/issues/403)
 # If the server.pid file exists but the corresponding process does not, rails will be 
 # caught in a restart loop, leading to a high CPU utilization. 
-# Fixed since Chef Server 12.6.0.
 
-# [[ -e /opt/opscode/embedded/service/oc_id/tmp/pids/server.pid ]] && rm -f /opt/opscode/embedded/service/oc_id/tmp/pids/server.pid
+[[ -e /opt/opscode/embedded/service/oc_id/tmp/pids/server.pid ]] && rm -f /opt/opscode/embedded/service/oc_id/tmp/pids/server.pid
 
-# /opt/opscode/embedded/bin/runsvdir-start &
 echo -e "[$(date)]\tStarting the Chef server and tracing logs ..."
-/usr/bin/chef-server-ctl start
+/opt/opscode/embedded/bin/runsvdir-start &
 if [[ -f "/root/chef_configured" ]]; then
 	echo -e "[$(date)]\tChef Server already configured!\n"
     chef-server-ctl status
@@ -40,11 +38,11 @@ stop_chef() {
 
 trap 'kill ${!}; stop_chef' SIGTERM
 
-if [[ -z $(chef-server-ctl status) ]]
-then
-	echo "##### Chef server is not configured #####"
-	echo "##### Reconfiguring chef server...  #####"
-	chef-server-ctl reconfigure
-	echo "Chef server is up"
-fi
-echo "tracing chef server logs..."
+while sleep 2; do
+  ps aux | grep -q '[r]unsvdir -P /opt/opscode/service' # use regex to avoid grep process itself being grepped
+  RUNSVDIR_STATUS=$?
+  if [[ $RUNSVDIR_STATUS -ne 0 ]]; then
+  	echo -e "[$(date)]\tThe runsvdir program is not running. There is no guarantee that the spawned runsv processes can be properly maintained. Aborting the container ..."
+    exit 1
+  fi
+done
