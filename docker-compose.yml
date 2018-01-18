@@ -3,6 +3,7 @@ chef_server:
   container_name: chef_server
   hostname: ${HOSTNAME}
   environment:
+    - NON_STD_SSL=${NON_STD_SSL}
     - SSL_PORT=${SSL_PORT}
   restart: always
   env_file: ./chef_server.env
