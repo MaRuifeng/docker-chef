@@ -27,6 +27,7 @@ if [[ -f "/root/chef_configured" ]]; then
 else
     echo -e "[$(date)]\tApply required configurations of the Chef server ..."
     /usr/local/bin/setup.sh
+    [[ $? -ne 0 ]] && exit 1
 fi
 chef-server-ctl tail &
 

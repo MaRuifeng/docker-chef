@@ -12,7 +12,8 @@
 # TO
 # {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= @helper.vip_for_uri('bookshelf') %>:<%= node['private_chef']['nginx']['ssl_port'] %>"},
 export S3_URL_CONFIG_PATH=/opt/opscode/embedded/cookbooks/private-chef/templates/default/oc_erchef.config.erb
-export S3_URL_CHECK_PATH=/var/opt/opscode/opscode-erchef/etc/app.config
+# export S3_URL_CHECK_PATH=/var/opt/opscode/opscode-erchef/etc/app.config
+export S3_URL_CHECK_PATH=/var/opt/opscode/opscode-erchef/etc/sys.config  # Renamed in newer versions of Chef
 
 export API_FQDN=$(hostname -f)
 
@@ -41,11 +42,11 @@ if [[ ${NON_STD_SSL} == true ]]; then
 	cat ${S3_URL_CHECK_PATH} | grep s3_url
 fi
 
-echo -e "[$(date)]\tCreating user and organization...";
-chef-server-ctl user-create ${USER} ${FIRST_NAME} ${LAST_NAME} ${EMAIL} ${PASSWORD} -f /etc/chef/${USER_PEM};
-chef-server-ctl org-create ${ORG} ${ORG_FULL_NAME} --association_user ${USER} -f /etc/chef/${ORG_PEM};
-chef-server-ctl user-show ${USER};
-chef-server-ctl org-show ${ORG};
+echo -e "[$(date)]\tCreating user and organization..."
+chef-server-ctl user-create ${USER} ${FIRST_NAME} ${LAST_NAME} ${EMAIL} ${PASSWORD} -f /etc/chef/${USER_PEM}
+chef-server-ctl org-create ${ORG} ${ORG_FULL_NAME} --association_user ${USER} -f /etc/chef/${ORG_PEM}
+chef-server-ctl user-show ${USER}
+chef-server-ctl org-show ${ORG}
 
 touch /root/chef_configured
 echo -e "[$(date)]\tChef server configuration completed."
