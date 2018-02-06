@@ -13,7 +13,7 @@
 # {s3_url, "<%= node['private_chef']['nginx']['x_forwarded_proto'] %>://<%= @helper.vip_for_uri('bookshelf') %>:<%= node['private_chef']['nginx']['ssl_port'] %>"},
 export S3_URL_CONFIG_PATH=/opt/opscode/embedded/cookbooks/private-chef/templates/default/oc_erchef.config.erb
 # export S3_URL_CHECK_PATH=/var/opt/opscode/opscode-erchef/etc/app.config
-export S3_URL_CHECK_PATH=/var/opt/opscode/opscode-erchef/etc/sys.config  # Renamed in newer versions of Chef
+export S3_URL_CHECK_PATH=/var/opt/opscode/opscode-erchef/sys.config  # Renamed in newer versions of Chef
 
 export API_FQDN=$(hostname -f)
 
