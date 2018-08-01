@@ -1,4 +1,4 @@
-# Chef-Test
+# Chef Server in Docker
 A containerized Chef server.
 Configuration is available to make it run on a non-standard SSL port. 
 
